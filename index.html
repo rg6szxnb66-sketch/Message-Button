@@ -209,12 +209,33 @@
         }
       }
 
+      .card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        padding: 40px 30px; /* Mobilde nefes alsın */
+        border-radius: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+        /* Kritik Değişiklikler */
+        display: inline-block; /* İçerik kadardır, block gibi yayılmaz */
+        min-width: 280px; /* Butonun rahat sığacağı bir alt sınır */
+        max-width: 90vw; /* Ekranın %90'ından fazla olamaz (taşmayı önler) */
+        width: auto; /* İçeriğe göre genişle */
+        box-sizing: border-box;
+        z-index: 10;
+      }
+
       #decoded-title {
+        font-size: clamp(1.8rem, 8vw, 3rem);
         font-family: "Courier New", Courier, monospace;
-        display: inline-block; /* Genişlik sabitlemek için gerekli */
-        min-width: 12ch; /* Yazı uzunluğu kadar (yaklaşık) yer ayırır, titremeyi keser */
-        white-space: nowrap; /* Alt satıra kaymayı önler */
-        margin: 0 auto;
+        display: block;
+        width: 100%;
+        white-space: pre-wrap; /* Karakterler sığmazsa alt satıra geçsin */
+        overflow-wrap: break-word;
+        margin: 0 auto 10px auto;
+        min-height: 1.2em;
       }
 
       #onur {
