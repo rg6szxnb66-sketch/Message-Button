@@ -210,7 +210,11 @@
       }
 
       #decoded-title {
-        font-family: monospace; /* Şifreli mesaj havası için */
+        font-family: "Courier New", Courier, monospace;
+        display: inline-block; /* Genişlik sabitlemek için gerekli */
+        min-width: 12ch; /* Yazı uzunluğu kadar (yaklaşık) yer ayırır, titremeyi keser */
+        white-space: nowrap; /* Alt satıra kaymayı önler */
+        margin: 0 auto;
       }
 
       #onur {
@@ -334,8 +338,7 @@
             .split("")
             .map((letter, index) => {
               if (index < iterations) return finalMainText[index];
-              const chars =
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()+-=[]{}|<>?";
+              const chars = "ABCDEFGHJKLMNOPQRSTUVWXYZ0123456789$#%&*";
               return chars[Math.floor(Math.random() * chars.length)];
             })
             .join("");
