@@ -92,6 +92,17 @@
         animation: float 6s ease-in-out infinite;
       }
 
+      #flash {
+        /* Doğum günü mesajı sırasında ekranın kısa süreliğine beyazlaşması için efekt */
+        position: fixed;
+        inset: 0;
+        background: white;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.1s ease;
+        z-index: 998;
+      }
+
       @keyframes float {
         0%,
         100% {
@@ -102,7 +113,6 @@
         }
       }
 
-      /* Sallanma Efekti */
       @keyframes shake {
         0%,
         100% {
@@ -135,6 +145,32 @@
         border: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         max-width: 80%;
+        z-index: 10;
+      }
+
+      /* Kayan Yıldız (Shooting Star) Düzenlendi */
+      .shooting-star {
+        position: fixed;
+        top: 0;
+        left: -200px;
+        width: 150px;
+        height: 2px;
+        background: linear-gradient(90deg, white, rgba(255, 255, 255, 0));
+        opacity: 0.8;
+        pointer-events: none;
+        z-index: 0;
+        animation: shoot 1.2s ease-out forwards;
+      }
+
+      @keyframes shoot {
+        0% {
+          transform: translateX(0) translateY(0) rotate(25deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(150vw) translateY(75vh) rotate(25deg);
+          opacity: 0;
+        }
       }
 
       button {
@@ -172,11 +208,36 @@
           filter: blur(0);
         }
       }
+
+      #decoded-title {
+        font-family: monospace; /* Şifreli mesaj havası için */
+      }
+
+      #onur {
+        opacity: 0;
+        transform: translateY(20px);
+        transition:
+          opacity 1s ease,
+          transform 1s ease;
+        font-family: monospace;
+        font-size: 0.9rem;
+        color: #94a3b8;
+        margin-top: 15px;
+      }
+
+      /*JavaScript ile görünür hale geldiğinde yazar ismi animasyonlu şekilde ortaya çıkar*/
+      #onur.visible {
+        opacity: 1;
+        transform: translateY(
+          0
+        ); /* Yazar ismi hafifçe yukarı kayarak görünür hale gelir */
+      }
     </style>
   </head>
   <body>
     <div id="stars-container"></div>
     <div id="countdown-overlay"></div>
+    <div id="flash"></div>
 
     <div id="banner-container" class="banner-container hidden">
       <img
@@ -193,6 +254,7 @@
 
       <div id="birthday-msg" class="hidden">
         <h1
+          id="decoded-title"
           style="
             font-size: 3rem;
             background: linear-gradient(to right, #60a5fa, #802893);
@@ -200,12 +262,15 @@
             -webkit-text-fill-color: transparent;
           "
         >
-          İYİ Kİ DOĞDUN! 🎉
+          S2kgRG9nZHVulA==
         </h1>
         <p style="font-family: monospace; font-size: 1.5rem">
           Yeni yaşında her şey gönlünce olsun!
         </p>
-        <p style="font-family: monospace; font-size: 0.9rem; color: #94a3b8">
+        <p
+          id="onur"
+          style="font-family: monospace; font-size: 0.9rem; color: #94a3b8"
+        >
           (By Onur Yüksek)
         </p>
       </div>
@@ -232,14 +297,57 @@
       const message = document.getElementById("birthday-msg");
       const banner = document.getElementById("banner-container");
       const overlay = document.getElementById("countdown-overlay");
+      const decodedTitle = document.getElementById("decoded-title");
+      const author = document.getElementById("onur");
 
       let surpriseActive = false;
 
-      // Sallanma fonksiyonu
       function triggerShake() {
         document.body.classList.remove("shake");
-        void document.body.offsetWidth; // Reflow forcing
+        void document.body.offsetWidth;
         document.body.classList.add("shake");
+      }
+
+      // Kayan Yıldız Fonksiyonu
+      function createShootingStar() {
+        const star = document.createElement("div");
+        star.classList.add("shooting-star");
+        star.style.top = Math.random() * window.innerHeight * 0.5 + "px";
+        document.body.appendChild(star);
+        setTimeout(() => {
+          star.remove();
+        }, 1200);
+      }
+
+      setInterval(() => {
+        if (Math.random() < 0.3) {
+          createShootingStar();
+        }
+      }, 2000);
+
+      // Şifre Çözme Efekti
+      function decodeEffect() {
+        const finalMainText = "İYİ Kİ DOĞDUN! 🎉";
+        let iterations = 0;
+        const interval = setInterval(() => {
+          decodedTitle.innerText = finalMainText
+            .split("")
+            .map((letter, index) => {
+              if (index < iterations) return finalMainText[index];
+              const chars =
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()+-=[]{}|<>?";
+              return chars[Math.floor(Math.random() * chars.length)];
+            })
+            .join("");
+
+          if (iterations >= finalMainText.length) {
+            clearInterval(interval);
+            setTimeout(() => {
+              author.classList.add("visible");
+            }, 500);
+          }
+          iterations += 1 / 12; // Hız ayarı (1 harf 12 iterasyonda çözülür)
+        }, 40); // Her 40ms'de bir harf çözülür.
       }
 
       btn.addEventListener("click", () => {
@@ -247,22 +355,29 @@
         overlay.style.opacity = "1";
         overlay.textContent = count;
         overlay.style.pointerEvents = "all";
-        triggerShake(); // 3'te salla
+        triggerShake();
 
         const interval = setInterval(() => {
           count--;
           if (count > 0) {
             overlay.textContent = count;
-            triggerShake(); // 2 ve 1'de salla
+            triggerShake();
           } else {
             clearInterval(interval);
             overlay.textContent = "🎆";
-            triggerShake(); // Patlama anında salla
+            triggerShake();
 
             setTimeout(() => {
               overlay.style.opacity = "0";
               overlay.style.pointerEvents = "none";
               surpriseActive = true;
+
+              const flash = document.getElementById("flash");
+              flash.style.opacity = "1"; //Flash efekti başlasın
+
+              setTimeout(() => {
+                flash.style.opacity = "0";
+              }, 100);
 
               confetti({
                 particleCount: 700,
@@ -270,19 +385,13 @@
                 origin: { y: 0.5 },
                 colors: ["#60a5fa", "#802893", "#ffffff"],
               });
-              confetti({
-                particleCount: 200,
-                spread: 200,
-                origin: { y: 0 },
-                scalar: 2,
-                shapes: ["circle"],
-                colors: ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"],
-              });
 
               initial.classList.add("hidden");
               message.classList.remove("hidden");
               banner.classList.remove("hidden");
               document.body.style.backgroundColor = "#1e1b4b";
+
+              decodeEffect(); // Şifre çözme başlasın
             }, 800);
           }
         }, 1000);
